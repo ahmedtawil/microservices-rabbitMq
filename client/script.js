@@ -81,10 +81,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         const name = nameInput.value;
         const email = emailInput.value;
 
-        if(name.trim()=="" || email.trim=="") {
+        if(name.trim()=="" || email.trim()=="") {
             return alert('fill inputs please!!');
         }
-        
+
         const user = {name , email};
         await addUser(user);
 
