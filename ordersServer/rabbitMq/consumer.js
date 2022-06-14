@@ -2,9 +2,9 @@ const amqp = require('amqplib')
 
 const connect = async () => {
     try {
-        const connection = await amqp.connect('amqp://localhost:5672');
+        const connection = await amqp.connect(process.env.RABBITMQ_SERVER_URI);
         const channel = await connection.createChannel();
-        const result = await channel.assertQueue('users');
+        await channel.assertQueue(process.env.RABBITMQ_QEUE_NAME);
         return channel
 
     } catch (error) {
