@@ -1,19 +1,20 @@
 
 const path = require('path');
+require('dotenv').config({ path: './configs/config.env' });
 const express = require('express');
 const db = require('./db/config');
 const app = express();
 const rabbitMq = require('./rabbitMq/producer');
+const User = require('./db/userSchema');
+const { messages , errorMessages} = require('../constants')
 let channel = null;
 
-const User = require('./db/userSchema');
-
-app.use(express.static(path.join(__dirname, '../','client'))) ;
+app.use(express.static(path.join(__dirname, '../', 'client')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.get('/', async (req, res) => {
-    res.sendFile('index.html');
+    res.sendFile('./index.html');
 });
 
 app.get('/interanl/users/list/get', async (req, res) => {
@@ -29,8 +30,8 @@ app.post('/user/deactivate', async (req, res) => {
         ...user.toJSON(),
         optType: 'deactivateUser'
     }
-    channel.sendToQueue('users', Buffer(JSON.stringify(msg)));
-    res.json({ success: true ,user});
+    channel.sendToQueue(process.env.RABBITMQ_QEUE_NAME, Buffer(JSON.stringify(msg)));
+    res.json({ success: true, user });
 });
 
 app.post('/user/register', async (req, res) => {
@@ -41,20 +42,20 @@ app.post('/user/register', async (req, res) => {
         ...user.toJSON(),
         optType: 'createNewUser'
     }
-    channel.sendToQueue('users', Buffer(JSON.stringify(msg)));
-    res.json({ success: true ,  user:user.toJSON()});
+    channel.sendToQueue(process.env.RABBITMQ_QEUE_NAME, Buffer(JSON.stringify(msg)));
+    res.json({ success: true, user: user.toJSON() });
 })
 
-app.listen(3000, async () => {
-    console.log('users server started at port 3000');
+app.listen(process.env.USERS_SERVER_PORT, async () => {
+    console.log(`${messages.SERVER.connection} : ${process.env.USERS_SERVER_PORT}`);
     try {
         await db.authenticate();
-        console.log('DB connection has been established successfully.');
+        console.log(messages.SERVER.connection);
         // await User.sync({ force: true });
         channel = await rabbitMq.connect();
 
     } catch (error) {
-        console.error('Unable to connect to the database:', error);
+        console.error(errorMessages.DB.connection, error);
         process.exit(0);
     }
 })

@@ -4,14 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "usersServer": "nodemon ./userServer/index.js",
-    "ordersServer": "nodemon ./orderServer/index.js"
+    "usersServer": "nodemon ./usersServer/index.js",
+    "ordersServer": "nodemon ./ordersServer/index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "amqplib": "^0.10.0",
     "axios": "^0.27.2",
+    "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "pg": "^8.7.3",
     "pg-hstore": "^2.3.4",

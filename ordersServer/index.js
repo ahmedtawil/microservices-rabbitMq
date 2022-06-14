@@ -1,20 +1,19 @@
 
+require('dotenv').config({ path: './configs/config.env' });
 const express = require('express');
 const axios = require('axios');
 const rabbitMq = require('./rabbitMq/consumer');
 const db = require('./db/config');
+const { messages , errorMessages} = require('../constants');
 const User = require('./db/userSchema');
-
-const app = express();
 let channel = null;
 
-app.get('/', (req, res) => {
-    res.sendFile('index.html');
-});
+const app = express();
+
 
 const createNewUser = async (msg) => {
     await User.create(msg);
-    console.log('new user created successfully');
+    console.log(messages.USER.successfullyCreateNewUser);
 }
 
 const deactivateUser = async (msg) => {
@@ -22,7 +21,7 @@ const deactivateUser = async (msg) => {
     const user = await User.findByPk(userID);
     if(!user) return;
     await user.destroy();
-    console.log('user deactivate successfully');
+    console.log(messages.USER.successfullyDeactivatedUser);
 }
 
 const handeleUsersQm = (data) => {
@@ -40,11 +39,11 @@ const handeleUsersQm = (data) => {
 
 }
 
-app.listen(5000, async () => {
-    console.log('orders server started at port 5000');
+app.listen(process.env.ORDERS_SERVER_PORT, async () => {
+    console.log(`${messages.SERVER.connection} : ${process.env.ORDERS_SERVER_PORT}`);
     try {
         await db.authenticate();
-        console.log('Connection has been established successfully.');
+        console.log(messages.SERVER.connection);
         await db.sync({ force: true });
 
         channel = await rabbitMq.connect();
@@ -53,14 +52,14 @@ app.listen(5000, async () => {
         const { users } = req.data;
         await User.bulkCreate(users);
 
-        channel.consume('users', (msg) => {
+        channel.consume(process.env.RABBITMQ_QEUE_NAME, (msg) => {
             handeleUsersQm(msg);
             channel.ack(msg);
         });
 
 
     } catch (error) {
-        console.error('Unable to connect to the database:', error);
+        console.error(errorMessages.DB.connection, error);
         process.exit(0);
     }
 
