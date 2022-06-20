@@ -5,15 +5,19 @@
   "main": "index.js",
   "scripts": {
     "usersServer": "nodemon ./usersServer/index.js",
-    "ordersServer": "nodemon ./ordersServer/index.js"
+    "ordersServer": "nodemon ./ordersServer/index.js",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@faker-js/faker": "^7.2.0",
     "amqplib": "^0.10.0",
     "axios": "^0.27.2",
+    "casual": "^1.6.2",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "faker": "^6.6.6",
     "pg": "^8.7.3",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.20.1"

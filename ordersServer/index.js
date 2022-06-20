@@ -4,7 +4,7 @@ const express = require('express');
 const axios = require('axios');
 const rabbitMq = require('./rabbitMq/consumer');
 const db = require('./db/config');
-const { messages , errorMessages} = require('../constants');
+const { messages, errorMessages } = require('../constants');
 const User = require('./db/userSchema');
 let channel = null;
 
@@ -19,7 +19,7 @@ const createNewUser = async (msg) => {
 const deactivateUser = async (msg) => {
     const { id: userID } = msg;
     const user = await User.findByPk(userID);
-    if(!user) return;
+    if (!user) return;
     await user.destroy();
     console.log(messages.USER.successfullyDeactivatedUser);
 }

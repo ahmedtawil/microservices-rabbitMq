@@ -6,7 +6,7 @@ const db = require('./db/config');
 const app = express();
 const rabbitMq = require('./rabbitMq/producer');
 const User = require('./db/userSchema');
-const { messages , errorMessages} = require('../constants')
+const { messages, errorMessages } = require('../constants')
 let channel = null;
 
 app.use(express.static(path.join(__dirname, '../', 'client')));
@@ -24,6 +24,8 @@ app.get('/interanl/users/list/get', async (req, res) => {
 
 app.post('/user/deactivate', async (req, res) => {
     const { userID } = req.body;
+    console.log(isNaN(Number(userID)));
+    if (userID == undefined || typeof userID != 'number') return res.json({ success: false, msg: errorMessages.USER.invalidUserID });
     const user = await User.findByPk(userID);
     await user.destroy();
     const msg = {
@@ -31,11 +33,12 @@ app.post('/user/deactivate', async (req, res) => {
         optType: 'deactivateUser'
     }
     channel.sendToQueue(process.env.RABBITMQ_QEUE_NAME, Buffer(JSON.stringify(msg)));
-    res.json({ success: true, user });
+    res.json({ success: true });
 });
 
 app.post('/user/register', async (req, res) => {
     const { name, email } = req.body;
+    if (name == undefined || email == undefined || name.trim() == '' || email.trim() == '') return res.json({ success: false, msg: errorMessages.USER.invalidUserParameters });
     console.log(req.body);
     const user = await User.create({ name, email });
     const msg = {

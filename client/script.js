@@ -22,9 +22,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         const deactivateButton = optionsCell.querySelector('input');
         deactivateButton.addEventListener('click', async function handleClick(event) {
             const td = event.target.parentNode;
-            const tr = td.parentNode; 
+            const tr = td.parentNode;
             const userID = tr.id;
-            deactivateUser({userID});
+            deactivateUser({ userID });
 
         });
     }
@@ -81,11 +81,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         const name = nameInput.value;
         const email = emailInput.value;
 
-        if(name.trim()=="" || email.trim()=="") {
+        if (name.trim() == "" || email.trim() == "") {
             return alert('fill inputs please!!');
         }
 
-        const user = {name , email};
+        const user = { name, email };
         await addUser(user);
 
         nameInput.value = '';
