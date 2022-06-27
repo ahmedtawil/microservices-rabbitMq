@@ -1,42 +1,46 @@
+import path from 'path';
+import dotenv, { DotenvConfigOptions } from 'dotenv';
+import express, { Express, Request, Response, Application } from 'express';
+import amqp, { Connection, Channel } from 'amqplib';
 
-const path = require('path');
-require('dotenv').config({ path: './configs/config.env' });
-const express = require('express');
-const db = require('./db/config');
-const app = express();
-const rabbitMq = require('./rabbitMq/producer');
-const User = require('./db/userSchema');
-const { messages, errorMessages } = require('../constants')
-let channel = null;
+import db from './db/config';
+const app: Express = express();
+import rabbitMq from './rabbitMq/producer';
+import User from './db/userSchema';
+import { messages, errorMessages } from '../constants';
+import { Model } from 'sequelize/types';
+let channel: Channel | undefined;
+
+const options: DotenvConfigOptions = { path: './configs/config.env' };
+dotenv.config(options)
 
 app.use(express.static(path.join(__dirname, '../', 'client')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.get('/', async (req, res) => {
+app.get('/', async (req: Request, res: Response) => {
     res.sendFile('./index.html');
 });
 
-app.get('/interanl/users/list/get', async (req, res) => {
+app.get('/interanl/users/list/get', async (req: Request, res: Response) => {
     const users = await User.findAll();
     res.json({ success: true, users });
 });
 
-app.post('/user/deactivate', async (req, res) => {
-    const { userID } = req.body;
-    console.log(isNaN(Number(userID)));
+app.post('/user/deactivate', async (req: Request, res: Response) => {
+    const userID: String = req.body.userID;
     if (userID == undefined || typeof userID != 'number') return res.json({ success: false, msg: errorMessages.USER.invalidUserID });
-    const user = await User.findByPk(userID);
+    const user: Model<any, any> | null = await User.findByPk(userID);
     await user.destroy();
     const msg = {
         ...user.toJSON(),
         optType: 'deactivateUser'
     }
-    channel.sendToQueue(process.env.RABBITMQ_QEUE_NAME, Buffer(JSON.stringify(msg)));
+    channel.sendToQueue(process.env.RABBITMQ_QEUE_NAME, new Buffer(JSON.stringify(msg)));
     res.json({ success: true });
 });
 
-app.post('/user/register', async (req, res) => {
+app.post('/user/register', async (req: Request, res: Response) => {
     const { name, email } = req.body;
     if (name == undefined || email == undefined || name.trim() == '' || email.trim() == '') return res.json({ success: false, msg: errorMessages.USER.invalidUserParameters });
     console.log(req.body);
@@ -45,17 +49,18 @@ app.post('/user/register', async (req, res) => {
         ...user.toJSON(),
         optType: 'createNewUser'
     }
-    channel.sendToQueue(process.env.RABBITMQ_QEUE_NAME, Buffer(JSON.stringify(msg)));
+    channel.sendToQueue(process.env.RABBITMQ_QEUE_NAME, new Buffer(JSON.stringify(msg)));
     res.json({ success: true, user: user.toJSON() });
 })
 
-app.listen(process.env.USERS_SERVER_PORT, async () => {
+const USERS_SERVER_PORT: string = process.env.USERS_SERVER_PORT
+app.listen(USERS_SERVER_PORT, async () => {
     console.log(`${messages.SERVER.connection} : ${process.env.USERS_SERVER_PORT}`);
     try {
         await db.authenticate();
         console.log(messages.SERVER.connection);
         // await User.sync({ force: true });
-        channel = await rabbitMq.connect();
+        channel = await rabbitMq();
 
     } catch (error) {
         console.error(errorMessages.DB.connection, error);

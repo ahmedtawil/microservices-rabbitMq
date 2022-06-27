@@ -1,7 +1,8 @@
-module.exports =  {
+"use strict";
+module.exports = {
     messages: {
         SERVER: {
-            connection : 'server started at port'
+            connection: 'server started at port'
         },
         DB: {
             successfullyConnected: 'DB connection has been established successfully.'
@@ -10,7 +11,6 @@ module.exports =  {
             successfullyCreateNewUser: 'new user created successfully',
             successfullyDeactivatedUser: 'user deactivated successfully'
         }
-
     },
     errorMessages: {
         DB: {
@@ -21,5 +21,4 @@ module.exports =  {
             invalidUserID: 'invalid user ID'
         }
     }
-
-} 
+};

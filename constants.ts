@@ -1,4 +1,4 @@
-module.exports =  {
+export =  {
     messages: {
         SERVER: {
             connection : 'server started at port'
