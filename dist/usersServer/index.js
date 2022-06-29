@@ -20,6 +20,7 @@ const app = (0, express_1.default)();
 const producer_1 = __importDefault(require("./rabbitMq/producer"));
 const userSchema_1 = __importDefault(require("./db/userSchema"));
 const constants_1 = require("../constants");
+const Validator_1 = __importDefault(require("../middlewares/Validator"));
 let channel;
 const options = { path: './configs/config.env' };
 dotenv_1.default.config(options);
@@ -29,35 +30,22 @@ app.use(express_1.default.urlencoded({ extended: false }));
 app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.sendFile('./index.html');
 }));
-app.get('/interanl/users/list/get', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get('/internal/users/list/get', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const users = yield userSchema_1.default.findAll();
     res.json({ success: true, users });
 }));
 app.post('/user/deactivate', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const userID = Number(req.body.userID);
-    console.log(userID);
-    console.log(typeof userID);
-    console.log('........................' , userID);
-    console.log(isNaN(userID));
-    if (userID == undefined || typeof userID != 'number' ) {
-        console.log('---------------------------55555555555555555555555');
-
+    const userID = req.body.userID;
+    if (userID == undefined || typeof userID != 'number')
         return res.json({ success: false, msg: constants_1.errorMessages.USER.invalidUserID });
-    }
     const user = yield userSchema_1.default.findByPk(userID);
-    if(!user){
-        return res.json({ success: false, msg: constants_1.errorMessages.USER.invalidUserID });
-    }
     yield user.destroy();
     const msg = Object.assign(Object.assign({}, user.toJSON()), { optType: 'deactivateUser' });
-    channel.sendToQueue(process.env.RABBITMQ_QEUE_NAME, Buffer(JSON.stringify(msg)));
-
-    res.json({ success: true, user });
+    channel.sendToQueue(process.env.RABBITMQ_QEUE_NAME, new Buffer(JSON.stringify(msg)));
+    res.json({ success: true });
 }));
-app.post('/user/register', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post('/user/register', (0, Validator_1.default)('userSchema', { success: false, msg: constants_1.errorMessages.USER.invalidUserParameters }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email } = req.body;
-    if (name == undefined || email == undefined || name.trim() == '' || email.trim() == '')
-        return res.json({ success: false, msg: constants_1.errorMessages.USER.invalidUserParameters });
     console.log(req.body);
     const user = yield userSchema_1.default.create({ name, email });
     const msg = Object.assign(Object.assign({}, user.toJSON()), { optType: 'createNewUser' });

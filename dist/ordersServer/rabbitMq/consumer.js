@@ -14,13 +14,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const amqplib_1 = __importDefault(require("amqplib"));
 const RABBITMQ_SERVER_URI = process.env.RABBITMQ_SERVER_URI;
-const RABBITMQ_QEUE_NAME = process.env.RABBITMQ_QEUE_NAME;
+const RABBITMQ_QUEUE_NAME = process.env.RABBITMQ_QUEUE_NAME;
 const connect = () => __awaiter(void 0, void 0, void 0, function* () {
     let channel;
     try {
         const connection = yield amqplib_1.default.connect();
         channel = yield connection.createChannel(RABBITMQ_SERVER_URI);
-        yield channel.assertQueue(RABBITMQ_QEUE_NAME);
+        yield channel.assertQueue(RABBITMQ_QUEUE_NAME);
     }
     catch (error) {
         console.log(error);

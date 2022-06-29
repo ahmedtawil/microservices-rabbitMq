@@ -54,7 +54,7 @@ app.listen(process.env.ORDERS_SERVER_PORT, () => __awaiter(void 0, void 0, void 
         console.log(constants_1.messages.SERVER.connection);
         yield config_1.default.sync({ force: true });
         channel = yield (0, consumer_1.default)();
-        const req = yield axios_1.default.get('http://localhost:3000/interanl/users/list/get');
+        const req = yield axios_1.default.get('http://localhost:3000/internal/users/list/get');
         const { users } = req.data;
         yield userSchema_1.default.bulkCreate(users);
         channel.consume(process.env.RABBITMQ_QEUE_NAME, (msg) => {

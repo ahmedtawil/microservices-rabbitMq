@@ -1,27 +1,27 @@
 import path from 'path';
-import dotenv , {DotenvConfigOptions} from 'dotenv';
-import express, { Express, Request, Response , Application } from 'express';
+import dotenv, { DotenvConfigOptions } from 'dotenv';
+import express, { Express, Request, Response, Application } from 'express';
 import amqp, { Connection, Channel } from 'amqplib';
- 
-import db from './db/config';
-const app : Express = express();
-import rabbitMq from './rabbitMq/consumer';
-import User  from './db/userSchema';
-import { messages, errorMessages } from '../constants';
-import axios , {AxiosPromise , AxiosResponse} from 'axios';
-import { Model } from 'sequelize/types';
-let channel : Channel;
 
-const options : DotenvConfigOptions = {path: './configs/config.env' };
+import db from './db/config';
+const app: Express = express();
+import rabbitMq from './rabbitMq/consumer';
+import User from './db/userSchema';
+import { messages, errorMessages } from '../constants';
+import axios, { AxiosPromise, AxiosResponse } from 'axios';
+import { Model } from 'sequelize/types';
+let channel: Channel;
+
+const options: DotenvConfigOptions = { path: './configs/config.env' };
 dotenv.config(options)
 
 
-const createNewUser = async (msg:any) => {
+const createNewUser = async (msg: any) => {
     await User.create(msg);
     console.log(messages.USER.successfullyCreateNewUser);
 }
 
-const deactivateUser = async (msg:any) => {
+const deactivateUser = async (msg: any) => {
     const { id: userID } = msg;
     const user = await User.findByPk(userID);
     if (!user) return;
@@ -29,7 +29,7 @@ const deactivateUser = async (msg:any) => {
     console.log(messages.USER.successfullyDeactivatedUser);
 }
 
-const handeleUsersQm = (data:any) => {
+const handeleUsersQm = (data: any) => {
     const msg = JSON.parse(data.content.toString());
     const { optType } = msg;
     switch (optType) {
@@ -53,7 +53,7 @@ app.listen(process.env.ORDERS_SERVER_PORT, async () => {
 
         channel = await rabbitMq();
 
-        const req  = await axios.get('http://localhost:3000/interanl/users/list/get');
+        const req = await axios.get('http://localhost:3000/internal/users/list/get');
         const { users } = req.data;
         await User.bulkCreate(users);
 

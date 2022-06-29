@@ -1,7 +1,7 @@
-export =  {
+export = {
     messages: {
         SERVER: {
-            connection : 'server started at port'
+            connection: 'server started at port'
         },
         DB: {
             successfullyConnected: 'DB connection has been established successfully.'
