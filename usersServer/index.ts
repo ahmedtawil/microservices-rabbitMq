@@ -9,6 +9,7 @@ import rabbitMq from './rabbitMq/producer';
 import User from './db/userSchema';
 import { messages, errorMessages } from '../constants';
 import { Model } from 'sequelize/types';
+import Validator from '../middlewares/Validator'
 let channel: Channel | undefined;
 
 const options: DotenvConfigOptions = { path: './configs/config.env' };
@@ -22,7 +23,7 @@ app.get('/', async (req: Request, res: Response) => {
     res.sendFile('./index.html');
 });
 
-app.get('/interanl/users/list/get', async (req: Request, res: Response) => {
+app.get('/internal/users/list/get', async (req: Request, res: Response) => {
     const users = await User.findAll();
     res.json({ success: true, users });
 });
@@ -40,9 +41,8 @@ app.post('/user/deactivate', async (req: Request, res: Response) => {
     res.json({ success: true });
 });
 
-app.post('/user/register', async (req: Request, res: Response) => {
+app.post('/user/register', Validator('userSchema', { success: false, msg: errorMessages.USER.invalidUserParameters }), async (req: Request, res: Response) => {
     const { name, email } = req.body;
-    if (name == undefined || email == undefined || name.trim() == '' || email.trim() == '') return res.json({ success: false, msg: errorMessages.USER.invalidUserParameters });
     console.log(req.body);
     const user = await User.create({ name, email });
     const msg = {

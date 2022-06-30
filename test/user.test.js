@@ -42,7 +42,6 @@ describe('user service', () => {
         const user = { userID: '' };
         const res = await deactivateUserRequest(user);
         const expectedRes = { success: false, msg: errorMessages.USER.invalidUserID };
-        console.log(res.data);
         expect(res.data).toEqual(expectedRes);
     });
 
@@ -52,7 +51,6 @@ describe('user service', () => {
             email: casual.email
         };
         const res1 = await createNewUserRequest(mewUserData);
-        console.log(res1.data);
         const user = { userID: res1.data.user.id };
         const res2 = await deactivateUserRequest(user);
         expect(res2.data.success).toBeTruthy();
